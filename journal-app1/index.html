@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192-v2.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Журнал">
+<meta name="theme-color" content="#f2f4f8">
+<title>Журнал визитов</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 16px 14px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f2f4f8; color: #1a1f2b; font-size: 16px; line-height: 1.4;
+  }
+  .app-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  h1 { font-size: 20px; margin: 0; font-weight: 700; flex: 1; min-width: 0; word-break: break-word; }
+  .edit-title-btn {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
+    border: 1px solid #d0d5dd; background: #ffffff; color: #6b7280;
+    font-size: 15px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .edit-title-btn:active { background: #eef1f6; color: #4a7dff; }
+  .sub { font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+  .btn {
+    display: block; width: 100%; padding: 14px; border-radius: 12px;
+    border: none; font-size: 16px; font-weight: 600; cursor: pointer;
+    background: #4a7dff; color: #fff; margin-bottom: 16px;
+  }
+  .btn:active { opacity: .8; }
+  .btn-secondary {
+    background: #ffffff; color: #1a1f2b; border: 1px solid #d0d5dd;
+  }
+  .btn-danger { background: #e74c3c; color: #fff; }
+
+  .day-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 14px; padding: 14px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-left: 4px solid #4a7dff;
+    display: flex; align-items: center; gap: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  }
+  .day-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+  .day-card-body { flex: 1; min-width: 0; cursor: pointer; position: relative; z-index: 1; }
+  .day-card-body:active { opacity: .7; }
+  .day-title { font-weight: 700; font-size: 16px; }
+  .day-counts { font-size: 12px; color: #6b7280; margin-top: 6px; }
+  .day-important-flag { font-size: 12px; color: #b87700; font-weight: 600; margin-top: 4px; }
+
+  .empty { color: #6b7280; font-size: 14px; text-align: center; padding: 24px 0; }
+  .back {
+    display: inline-block; margin-bottom: 12px; color: #4a7dff;
+    font-size: 14px; cursor: pointer; font-weight: 600;
+  }
+  .day-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .day-header h1 { flex: 1; min-width: 0; }
+  .color-btn {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
+    border: 1px solid #d0d5dd; background: #ffffff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .color-btn:active { background: #eef1f6; }
+
+  .section-block { margin-top: 20px; }
+  .section-block-title {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px; padding: 0 4px;
+  }
+  .section-block-title h2 {
+    font-size: 14px; margin: 0; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .6px;
+  }
+  .section-block-title h2.akb { color: #2a6bd7; }
+  .section-block-title h2.razvitie { color: #b87700; }
+  .section-block-title h2.important { color: #c0392b; }
+  .add-point-inline {
+    padding: 6px 12px; border-radius: 8px; border: 1px solid #d0d5dd;
+    background: #ffffff; color: #4a7dff; font-size: 13px; font-weight: 600;
+    cursor: pointer;
+  }
+  .add-point-inline:active { background: #eef1f6; }
+
+  .important-textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(192, 57, 43, 0.25);
+    background: rgba(255, 255, 255, 0.85);
+    color: #1a1f2b;
+    font-size: 15px;
+    font-family: inherit;
+    line-height: 1.5;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  }
+  .important-textarea:focus { border-color: #c0392b; background: #ffffff; }
+  .important-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; padding: 0 4px; }
+
+  .point-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 14px; padding: 12px 14px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(0,0,0,0.05);
+    border-left: 4px solid #d0d5dd;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+    transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  }
+  .point-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+  .point-card > * { position: relative; z-index: 1; }
+  .point-card.has-ehat { border-left-color: #ffb84d; }
+  .point-card.has-zahodit { border-left-color: #1abc9c; }
+  .point-card.has-zvonit { border-left-color: #4a9eff; }
+  .point-card.has-ne-ehat { border-left-color: #d0d5dd; opacity: .7; }
+  .point-card.pinned { box-shadow: 0 0 0 2px #ffb84d, 0 4px 12px rgba(0,0,0,0.06); }
+  .point-card.pinned::after {
+    content: '📌';
+    position: absolute; top: 8px; right: 10px;
+    font-size: 14px; z-index: 2;
+  }
+  .point-card.dragging {
+    opacity: .4;
+  }
+  .point-card.drag-over {
+    box-shadow: 0 0 0 2px #4a7dff, 0 4px 12px rgba(74,125,255,0.2);
+  }
+  .point-card-main { cursor: pointer; }
+  .point-card-main:active { opacity: .7; }
+  .point-title { font-weight: 600; font-size: 15px; padding-right: 40px; }
+  .point-sub { font-size: 13px; color: #6b7280; margin-top: 2px; }
+  .point-note { font-size: 13px; color: #4b5563; margin-top: 6px; white-space: pre-wrap; }
+  .point-note .note-stamp { color: #9ca3af; font-size: 12px; }
+  .point-reminder { font-size: 12px; color: #e6952a; margin-top: 4px; }
+  .point-date { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .badges { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge {
+    display: inline-block; font-size: 11px; padding: 2px 8px;
+    border-radius: 6px; font-weight: 600;
+  }
+  .badge.ehat { background: #fff4e0; color: #b87700; }
+  .badge.zahodit { background: #e0f7f2; color: #0e8c74; }
+  .badge.zvonit { background: #e6f0ff; color: #2a6bd7; }
+  .badge.ne-ehat { background: #eef1f6; color: #6b7280; }
+  .point-order-btns {
+    display: flex; gap: 6px; margin-top: 8px;
+    justify-content: flex-end;
+  }
+  .order-btn {
+    width: 36px; height: 32px; border-radius: 8px;
+    border: 1px solid #d0d5dd; background: #ffffff; color: #4a7dff;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .order-btn:active { background: #eef1f6; }
+  .order-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .drag-handle {
+    position: absolute; top: 10px; left: 10px;
+    width: 24px; height: 24px; z-index: 3;
+    cursor: grab; opacity: .35;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #6b7280;
+    touch-action: none;
+  }
+  .drag-handle:active { opacity: .8; cursor: grabbing; }
+
+  .modal {
+    position: fixed; inset: 0; background: rgba(15,17,21,.4);
+    display: flex; align-items: flex-end; z-index: 100;
+  }
+  .modal.hidden { display: none; }
+  .modal-content {
+    background: #ffffff; width: 100%; border-radius: 16px 16px 0 0;
+    padding: 20px 16px 32px; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-content h2 { font-size: 18px; margin: 0 0 16px; }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 12px; color: #6b7280;
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 10px; border-radius: 8px;
+    border: 1px solid #d0d5dd; background: #f9fafb; color: #1a1f2b;
+    font-size: 16px; outline: none; font-family: inherit;
+  }
+  .field textarea { min-height: 120px; resize: vertical; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: #4a7dff; background: #ffffff; }
+  .field-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .modal-actions .btn { margin-bottom: 0; flex: 1; }
+  .status-group { display: flex; gap: 4px; flex-wrap: wrap; }
+  .status-group button {
+    flex: 1 1 calc(50% - 4px); padding: 10px; border-radius: 8px; border: 1px solid #d0d5dd;
+    background: #f9fafb; color: #6b7280; font-size: 13px; font-weight: 600;
+    cursor: pointer;
+  }
+  .status-group button.active.ehat { background: #fff4e0; color: #b87700; border-color: #ffb84d; }
+  .status-group button.active.zahodit { background: #e0f7f2; color: #0e8c74; border-color: #1abc9c; }
+  .status-group button.active.zvonit { background: #e6f0ff; color: #2a6bd7; border-color: #4a9eff; }
+  .status-group button.active.ne-ehat { background: #eef1f6; color: #1a1f2b; border-color: #6b7280; }
+
+  .section-group { display: flex; gap: 6px; }
+  .section-group button {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #d0d5dd;
+    background: #f9fafb; color: #6b7280; font-size: 14px; font-weight: 600;
+    cursor: pointer;
+  }
+  .section-group button.active.akb { background: #e6f0ff; color: #2a6bd7; border-color: #4a9eff; }
+  .section-group button.active.razvitie { background: #fff4e0; color: #b87700; border-color: #ffb84d; }
+
+  .color-picker { display: flex; flex-wrap: wrap; gap: 12px; }
+  .color-swatch {
+    position: relative;
+    width: 48px; height: 48px; border-radius: 14px;
+    cursor: pointer; overflow: hidden;
+    border: 2px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+    transition: transform .1s;
+  }
+  .color-swatch::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+  .color-swatch.selected {
+    border-color: #1a1f2b;
+    box-shadow: 0 0 0 2px #4a7dff, 0 2px 8px rgba(0,0,0,0.15);
+    transform: scale(1.05);
+  }
+  .color-swatch:active { opacity: .8; transform: scale(0.95); }
+
+  .hidden { display: none !important; }
+  .backup-actions {
+    margin-top: 32px; padding-top: 16px; border-top: 1px solid #d0d5dd;
+    display: flex; gap: 8px;
+  }
+  .backup-actions .btn { margin-bottom: 0; flex: 1; font-size: 14px; padding: 12px; }
+
+  .checkbox-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+  .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: #4a7dff; }
+  .checkbox-row label { font-size: 15px; color: #1a1f2b; }
+</style>
+</head>
+<body>
+
+<div id="view-list">
+  <div class="app-header">
+    <h1 id="app-title">Журнал визитов</h1>
+    <button class="edit-title-btn" id="edit-title-btn" aria-label="Изменить название">✏️</button>
+  </div>
+  <div class="sub">Твои дни, точки и заметки</div>
+  <div id="days-container"></div>
+  <div class="backup-actions">
+    <button class="btn btn-secondary" id="export-btn">⬇ Экспорт</button>
+    <button class="btn btn-secondary" id="import-btn">⬆ Импорт</button>
+  </div>
+  <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+</div>
+
+<div id="view-day" class="hidden">
+  <div class="back" id="back-to-list">← Все дни</div>
+  <div class="day-header">
+    <h1 id="day-title"></h1>
+    <button class="color-btn" id="edit-day-color" aria-label="Изменить цвет дня">🎨</button>
+  </div>
+
+  <div class="section-block">
+    <div class="section-block-title">
+      <h2 class="important">Задачи, важное!</h2>
+    </div>
+    <textarea class="important-textarea" id="day-important" placeholder="Скопируй сюда важное из рабочих чатов — задачи, договорённости, цифры, ссылки. Сохраняется автоматически."></textarea>
+    <div class="important-hint">Сохраняется автоматически. Своё для каждого дня.</div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-block-title">
+      <h2 class="akb">АКБ</h2>
+      <button class="add-point-inline" data-section="akb">+ Добавить</button>
+    </div>
+    <div id="points-akb"></div>
+  </div>
+
+  <div class="section-block" id="razvitie-block">
+    <div class="section-block-title">
+      <h2 class="razvitie">Развитие (общее на неделю)</h2>
+      <button class="add-point-inline" data-section="razvitie">+ Добавить</button>
+    </div>
+    <div id="points-razvitie"></div>
+  </div>
+</div>
+
+<div id="modal-title" class="modal hidden">
+  <div class="modal-content">
+    <h2>Название приложения</h2>
+    <div class="field">
+      <label>Как назвать</label>
+      <input type="text" id="title-input" placeholder="Например: Мои точки">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="title-cancel">Отмена</button>
+      <button class="btn" id="title-save">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-color" class="modal hidden">
+  <div class="modal-content">
+    <h2>Цвет дня</h2>
+    <div class="color-picker" id="color-picker"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-secondary" id="color-cancel">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-point" class="modal hidden">
+  <div class="modal-content">
+    <h2 id="modal-point-title">Новая точка</h2>
+    <div class="field">
+      <label>Секция</label>
+      <div class="section-group">
+        <button type="button" data-section="akb" class="akb">АКБ</button>
+        <button type="button" data-section="razvitie" class="razvitie">Развитие</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Название</label>
+      <input type="text" id="point-title" placeholder="Например: Авто-М, Баррикад">
+    </div>
+    <div class="field">
+      <label>Адрес / ЛПР</label>
+      <input type="text" id="point-sub" placeholder="Например: Виктория — ЛПР, Баррикад 2/8">
+    </div>
+    <div class="field">
+      <label>Телефон</label>
+      <input type="tel" id="point-phone" placeholder="+7 ...">
+    </div>
+    <div class="field">
+      <label>Статусы (можно несколько)</label>
+      <div class="status-group">
+        <button type="button" data-status="ehat" class="ehat">Ехать</button>
+        <button type="button" data-status="zahodit" class="zahodit">Заходить</button>
+        <button type="button" data-status="zvonit" class="zvonit">Звонить</button>
+        <button type="button" data-status="ne-ehat" class="ne-ehat">Не ехать</button>
+      </div>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="point-pinned">
+      <label for="point-pinned">📌 Закрепить (всегда сверху)</label>
+    </div>
+    <div class="field">
+      <label>Дата (необязательно)</label>
+      <input type="date" id="point-date">
+    </div>
+    <div class="field">
+      <label>Заметка (о чём говорил, что предлагал)</label>
+      <textarea id="point-note" placeholder="Например: берут Тебойл, нужно подписать договор. Предложил Takayama 5W-30."></textarea>
+      <div class="field-hint">При сохранении в начало заметки автоматически добавится дата и время.</div>
+    </div>
+    <div class="field">
+      <label>Текст напоминания (необязательно)</label>
+      <input type="text" id="point-reminder" placeholder="Например: перезвонить Виктории">
+    </div>
+    <div class="field">
+      <label>Дата и время напоминания (необязательно)</label>
+      <input type="datetime-local" id="point-reminder-datetime">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="point-delete">Удалить</button>
+      <button class="btn btn-secondary" id="point-cancel">Отмена</button>
+      <button class="btn" id="point-save">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var STORAGE_KEY = 'kaptain_journal_v1';
+  var DEFAULT_TITLE = 'Журнал визитов';
+  var DEFAULT_COLOR = '#4a7dff';
+
+  var WEEKDAYS = [
+    { key: 'mon', name: 'Понедельник' },
+    { key: 'tue', name: 'Вторник' },
+    { key: 'wed', name: 'Среда' },
+    { key: 'thu', name: 'Четверг' },
+    { key: 'fri', name: 'Пятница' }
+  ];
+
+  var COLORS = [
+    { hex: '#4a7dff', name: 'Синий' },
+    { hex: '#ffb84d', name: 'Оранжевый' },
+    { hex: '#27ae60', name: 'Зелёный' },
+    { hex: '#e74c3c', name: 'Красный' },
+    { hex: '#9b59b6', name: 'Фиолетовый' },
+    { hex: '#1abc9c', name: 'Бирюзовый' },
+    { hex: '#f39c12', name: 'Жёлтый' },
+    { hex: '#6b7280', name: 'Серый' }
+  ];
+
+  var STATUS_LABELS = { ehat: 'Ехать', zahodit: 'Заходить', zvonit: 'Звонить', 'ne-ehat': 'Не ехать' };
+  var STATUS_ORDER = { ehat: 0, zahodit: 1, zvonit: 2, 'ne-ehat': 3 };
+
+  var state = loadState();
+  var currentDayId = null;
+  var editingPointId = null;
+  var editingStatuses = [];
+  var editingSection = 'akb';
+  var originalNote = '';
+
+  function autoGrow(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function migratePoint(p) {
+    if (!p.statuses) {
+      p.statuses = p.status ? [p.status] : [];
+      delete p.status;
+    }
+    if (!p.note) p.note = '';
+    if (p.pinned === undefined) p.pinned = false;
+    if (typeof p.order !== 'number') p.order = 0;
+    return p;
+  }
+
+  function normalizeOrder(arr) {
+    arr.forEach(function(p, i){ p.order = i; });
+    return arr;
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      var s = raw ? JSON.parse(raw) : null;
+      if (!s || !s.days) {
+        s = createDefaultState();
+      }
+      if (!s.title) s.title = DEFAULT_TITLE;
+      if (!s.razvitie) s.razvitie = [];
+
+      var knownIds = {};
+      s.razvitie.forEach(function(p){ knownIds[p.id] = true; });
+
+      s.days.forEach(function(d){
+        if (!d.color) d.color = DEFAULT_COLOR;
+        if (!d.sections) d.sections = { akb: [], razvitie: [] };
+        if (!d.sections.akb) d.sections.akb = [];
+        if (!d.important) d.important = '';
+        var oldRaz = d.sections.razvitie || [];
+        d.sections.akb.forEach(migratePoint);
+        oldRaz.forEach(function(p){
+          migratePoint(p);
+          if (!knownIds[p.id]) {
+            s.razvitie.push(p);
+            knownIds[p.id] = true;
+          }
+        });
+        d.sections = { akb: d.sections.akb };
+      });
+
+      s.razvitie.forEach(migratePoint);
+      return s;
+    } catch (e) { return createDefaultState(); }
+  }
+
+  function createDefaultState() {
+    var days = WEEKDAYS.map(function(w) {
+      return { id: w.key, name: w.name, color: DEFAULT_COLOR, sections: { akb: [] }, important: '' };
+    });
+    return { days: days, title: DEFAULT_TITLE, razvitie: [] };
+  }
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+  function isNoRazvitie(day) {
+    return day.id === 'wed' || day.id === 'fri';
+  }
+
+  function show(view) {
+    document.getElementById('view-list').classList.toggle('hidden', view !== 'list');
+    document.getElementById('view-day').classList.toggle('hidden', view !== 'day');
+  }
+
+  function renderTitle() {
+    document.getElementById('app-title').textContent = state.title || DEFAULT_TITLE;
+    document.title = state.title || DEFAULT_TITLE;
+  }
+
+  function countStatuses(points) {
+    var c = { ehat: 0, zahodit: 0, zvonit: 0, 'ne-ehat': 0 };
+    (points || []).forEach(function(p){
+      (p.statuses || []).forEach(function(s){ if (c[s] !== undefined) c[s]++; });
+    });
+    return c;
+  }
+
+  function renderDays() {
+    var c = document.getElementById('days-container');
+    c.innerHTML = '';
+    var order = {};
+    WEEKDAYS.forEach(function(w, i){ order[w.key] = i; });
+
+    var sorted = state.days.slice().sort(function(a, b) {
+      var oa = order[a.id] !== undefined ? order[a.id] : 99;
+      var ob = order[b.id] !== undefined ? order[b.id] : 99;
+      return oa - ob;
+    });
+
+    sorted.forEach(function(day) {
+      var akbCount = (day.sections.akb || []).length;
+      var razCount = isNoRazvitie(day) ? 0 : state.razvitie.length;
+      var allPts = (day.sections.akb || []).concat(isNoRazvitie(day) ? [] : state.razvitie);
+      var counts = countStatuses(allPts);
+      var hasImportant = (day.important || '').trim().length > 0;
+
+      var card = document.createElement('div');
+      card.className = 'day-card';
+      var col = hexToRgba(day.color || DEFAULT_COLOR, 0.08);
+      card.style.background = 'linear-gradient(135deg, ' + col + ' 0%, rgba(255,255,255,0.7) 100%)';
+      card.style.borderLeftColor = day.color || DEFAULT_COLOR;
+
+      var body = document.createElement('div');
+      body.className = 'day-card-body';
+      var razLabel = isNoRazvitie(day) ? '' : ' · Развитие: ' + razCount;
+      var importantFlag = hasImportant ? '<div class="day-important-flag">📌 есть важное</div>' : '';
+      body.innerHTML =
+        '<div class="day-title" style="color:' + (day.color || DEFAULT_COLOR) + '">' + escapeHtml(day.name) + '</div>' +
+        '<div class="day-counts">АКБ: ' + akbCount + razLabel +
+        '<br>ехать: ' + counts.ehat + ' · заходить: ' + counts.zahodit + ' · звонить: ' + counts.zvonit + ' · не ехать: ' + counts['ne-ehat'] + '</div>' +
+        importantFlag;
+      body.addEventListener('click', function(){ openDay(day.id); });
+
+      card.appendChild(body);
+      c.appendChild(card);
+    });
+  }
+
+  function hexToRgba(hex, alpha) {
+    var h = hex.replace('#','');
+    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r = parseInt(h.substring(0,2), 16);
+    var g = parseInt(h.substring(2,4), 16);
+    var b = parseInt(h.substring(4,6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+
+  function openDay(id) {
+    currentDayId = id;
+    var day = state.days.find(function(d){ return d.id === id; });
+    if (!day) return;
+    document.getElementById('day-title').textContent = day.name;
+    document.getElementById('day-title').style.color = day.color || DEFAULT_COLOR;
+    var impEl = document.getElementById('day-important');
+    impEl.value = day.important || '';
+    autoGrow(impEl);
+
+    var razBlock = document.getElementById('razvitie-block');
+    if (isNoRazvitie(day)) {
+      razBlock.classList.add('hidden');
+    } else {
+      razBlock.classList.remove('hidden');
+    }
+
+    renderSection(day, 'akb', 'points-akb');
+    if (!isNoRazvitie(day)) {
+      renderSection(day, 'razvitie', 'points-razvitie');
+    }
+    show('day');
+  }
+
+  function sortPoints(pts) {
+    return pts.slice().sort(function(a, b) {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return (a.order || 0) - (b.order || 0);
+    });
+  }
+
+  function getSectionPoints(day, section) {
+    if (section === 'razvitie') return state.razvitie;
+    return day.sections.akb || [];
+  }
+
+  function renderNote(note) {
+    if (!note) return '';
+    var lines = note.split('\n');
+    return lines.map(function(line){
+      var m = line.match(/^\[([^\]]+)\]\s*(.*)$/);
+      if (m) {
+        return '<span class="note-stamp">[' + escapeHtml(m[1]) + ']</span> ' + escapeHtml(m[2]);
+      }
+      return escapeHtml(line);
+    }).join('<br>');
+  }
+
+  function renderSection(day, section, containerId) {
+    var c = document.getElementById(containerId);
+    c.innerHTML = '';
+    var pts = sortPoints(getSectionPoints(day, section));
+    if (!pts.length) {
+      c.innerHTML = '<div class="empty">Пока нет точек</div>';
+      return;
+    }
+    pts.forEach(function(p, idx) {
+      var st = p.statuses || [];
+      var cls = 'point-card';
+      if (st.indexOf('ehat') !== -1) cls += ' has-ehat';
+      else if (st.indexOf('zahodit') !== -1) cls += ' has-zahodit';
+      else if (st.indexOf('zvonit') !== -1) cls += ' has-zvonit';
+      else if (st.indexOf('ne-ehat') !== -1) cls += ' has-ne-ehat';
+      if (p.pinned) cls += ' pinned';
+
+      var card = document.createElement('div');
+      card.className = cls;
+      card.setAttribute('draggable', 'true');
+      card.setAttribute('data-id', p.id);
+      card.setAttribute('data-section', section);
+
+      var dateStr = p.date ? formatDateShort(p.date) : '';
+      var remStr = p.reminderDatetime ? formatDateTime(p.reminderDatetime) : '';
+      var badgesHtml = '';
+      if (st.length) {
+        badgesHtml = '<div class="badges">';
+        st.forEach(function(s){
+          badgesHtml += '<span class="badge ' + s + '">' + STATUS_LABELS[s] + '</span>';
+        });
+        badgesHtml += '</div>';
+      }
+      card.innerHTML =
+        '<div class="drag-handle" aria-hidden="true">⋮⋮</div>' +
+        '<div class="point-title">' + escapeHtml(p.title) + '</div>' +
+        (p.sub ? '<div class="point-sub">' + escapeHtml(p.sub) + '</div>' : '') +
+        (p.phone ? '<div class="point-sub"><a href="tel:' + escapeHtml(p.phone) + '" style="color:#4a7dff">' + escapeHtml(p.phone) + '</a></div>' : '') +
+        (dateStr ? '<div class="point-date">📅 ' + dateStr + '</div>' : '') +
+        (p.note ? '<div class="point-note">' + renderNote(p.note) + '</div>' : '') +
+        (p.reminder ? '<div class="point-reminder">⏰ ' + escapeHtml(p.reminder) + (remStr ? ' — ' + remStr : '') + '</div>' : '') +
+        badgesHtml +
+        '<div class="point-order-btns">' +
+          '<button class="order-btn" data-dir="-1" ' + (idx === 0 ? 'disabled' : '') + '>↑</button>' +
+          '<button class="order-btn" data-dir="1" ' + (idx === pts.length - 1 ? 'disabled' : '') + '>↓</button>' +
+        '</div>';
+
+      card.querySelector('.point-title').addEventListener('click', function(e){
+        e.stopPropagation();
+        openPoint(section, p.id);
+      });
+      card.querySelectorAll('.point-sub, .point-date, .point-note, .point-reminder, .badges').forEach(function(el){
+        el.addEventListener('click', function(e){
+          e.stopPropagation();
+          openPoint(section, p.id);
+        });
+      });
+
+      card.querySelectorAll('.order-btn').forEach(function(b){
+        b.addEventListener('click', function(e){
+          e.stopPropagation();
+          var dir = parseInt(b.getAttribute('data-dir'), 10);
+          movePoint(section, p.id, dir);
+        });
+      });
+
+      card.addEventListener('dragstart', function(e) {
+        if (e.target.closest('a')) { e.preventDefault(); return; }
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', p.id);
+      });
+      card.addEventListener('dragend', function() {
+        card.classList.remove('dragging');
+        container.querySelectorAll('.point-card').forEach(function(el){ el.classList.remove('drag-over'); });
+      });
+      card.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        card.classList.add('drag-over');
+      });
+      card.addEventListener('dragleave', function() {
+        card.classList.remove('drag-over');
+      });
+      card.addEventListener('drop', function(e) {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        var draggedId = e.dataTransfer.getData('text/plain');
+        if (!draggedId || draggedId === p.id) return;
+        reorderByDrop(section, draggedId, p.id);
+      });
+
+      c.appendChild(card);
+    });
+  }
+
+  function reorderByDrop(section, draggedId, targetId) {
+    var day = state.days.find(function(d){ return d.id === currentDayId; });
+    if (!day) return;
+    var arr = section === 'razvitie' ? state.razvitie : day.sections.akb;
+    var sorted = sortPoints(arr);
+    var fromIdx = sorted.findIndex(function(p){ return p.id === draggedId; });
+    var toIdx = sorted.findIndex(function(p){ return p.id === targetId; });
+    if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
+
+    var dragged = sorted[fromIdx];
+    var target = sorted[toIdx];
+
+    if (dragged.pinned !== target.pinned) {
+      dragged.pinned = target.pinned;
+    }
+
+    var a = dragged.order;
+    dragged.order = target.order;
+    target.order = a;
+
+    if (dragged.order === target.order) {
+      var pinned = sorted.filter(function(p){ return p.pinned; });
+      var unpinned = sorted.filter(function(p){ return !p.pinned; });
+      normalizeOrder(pinned);
+      normalizeOrder(unpinned);
+    }
+
+    saveState();
+    renderSection(day, 'akb', 'points-akb');
+    if (!isNoRazvitie(day)) renderSection(day, 'razvitie', 'points-razvitie');
+    renderDays();
+  }
+
+  function movePoint(section, id, dir) {
+    var day = state.days.find(function(d){ return d.id === currentDayId; });
+    if (!day) return;
+    var arr = section === 'razvitie' ? state.razvitie : day.sections.akb;
+    var sorted = sortPoints(arr);
+    var idx = sorted.findIndex(function(p){ return p.id === id; });
+    if (idx === -1) return;
+    var target = idx + dir;
+    if (target < 0 || target >= sorted.length) return;
+
+    var current = sorted[idx];
+    var other = sorted[target];
+
+    if (current.pinned !== other.pinned) {
+      current.pinned = other.pinned;
+    }
+
+    var aOrder = current.order;
+    var bOrder = other.order;
+    current.order = bOrder;
+    other.order = aOrder;
+
+    if (current.order === other.order) {
+      var pinned = sorted.filter(function(p){ return p.pinned; });
+      var unpinned = sorted.filter(function(p){ return !p.pinned; });
+      normalizeOrder(pinned);
+      normalizeOrder(unpinned);
+    }
+
+    saveState();
+    renderSection(day, 'akb', 'points-akb');
+    if (!isNoRazvitie(day)) renderSection(day, 'razvitie', 'points-razvitie');
+    renderDays();
+  }
+
+  function formatDateShort(iso) {
+    if (!iso) return '';
+    var d = new Date(iso + 'T00:00:00');
+    var months = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+    return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    var months = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+    var hh = String(d.getHours()).padStart(2,'0');
+    var mm = String(d.getMinutes()).padStart(2,'0');
+    return d.getDate() + ' ' + months[d.getMonth()] + ', ' + hh + ':' + mm;
+  }
+
+  function nowStamp() {
+    var d = new Date();
+    var dd = String(d.getDate()).padStart(2,'0');
+    var mm = String(d.getMonth()+1).padStart(2,'0');
+    var yyyy = d.getFullYear();
+    var hh = String(d.getHours()).padStart(2,'0');
+    var mi = String(d.getMinutes()).padStart(2,'0');
+    return dd + '.' + mm + '.' + yyyy + ', ' + hh + ':' + mi;
+  }
+
+  function escapeHtml(s) {
+    return String(s||'').replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function buildColorPicker(containerId, selectedColor, onSelect) {
+    var c = document.getElementById(containerId);
+    c.innerHTML = '';
+    COLORS.forEach(function(col) {
+      var sw = document.createElement('div');
+      sw.className = 'color-swatch' + (col.hex === selectedColor ? ' selected' : '');
+      sw.style.background = 'linear-gradient(135deg, ' + col.hex + ' 0%, ' + hexToRgba(col.hex, 0.7) + ' 100%)';
+      sw.setAttribute('title', col.name);
+      sw.addEventListener('click', function(){ onSelect(col.hex); });
+      c.appendChild(sw);
+    });
+  }
+
+  function openPoint(section, id) {
+    var day = state.days.find(function(d){ return d.id === currentDayId; });
+    if (!day) return;
+    var p = getSectionPoints(day, section).find(function(x){ return x.id === id; });
+    if (!p) return;
+    editingPointId = id;
+    editingSection = section;
+    editingStatuses = (p.statuses || []).slice();
+    originalNote = p.note || '';
+    document.getElementById('modal-point-title').textContent = 'Редактировать точку';
+    document.getElementById('point-title').value = p.title || '';
+    document.getElementById('point-sub').value = p.sub || '';
+    document.getElementById('point-phone').value = p.phone || '';
+    document.getElementById('point-date').value = p.date || '';
+    document.getElementById('point-note').value = p.note || '';
+    document.getElementById('point-reminder').value = p.reminder || '';
+    document.getElementById('point-reminder-datetime').value = p.reminderDatetime || '';
+    document.getElementById('point-pinned').checked = !!p.pinned;
+    updateStatusButtons();
+    updateSectionButtons();
+    document.getElementById('modal-point').classList.remove('hidden');
+  }
+
+  function openNewPoint(section) {
+    editingPointId = null;
+    editingSection = section || 'akb';
+    editingStatuses = [];
+    originalNote = '';
+    document.getElementById('modal-point-title').textContent = 'Новая точка';
+    document.getElementById('point-title').value = '';
+    document.getElementById('point-sub').value = '';
+    document.getElementById('point-phone').value = '';
+    document.getElementById('point-date').value = '';
+    document.getElementById('point-note').value = '';
+    document.getElementById('point-reminder').value = '';
+    document.getElementById('point-reminder-datetime').value = '';
+    document.getElementById('point-pinned').checked = false;
+    updateStatusButtons();
+    updateSectionButtons();
+    document.getElementById('modal-point').classList.remove('hidden');
+  }
+
+  function updateStatusButtons() {
+    document.querySelectorAll('.status-group button').forEach(function(b){
+      b.classList.toggle('active', editingStatuses.indexOf(b.dataset.status) !== -1);
+    });
+  }
+
+  function updateSectionButtons() {
+    document.querySelectorAll('.section-group button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.section === editingSection);
+    });
+  }
+
+  document.querySelectorAll('.status-group button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var s = b.dataset.status;
+      var idx = editingStatuses.indexOf(s);
+      if (idx === -1) editingStatuses.push(s);
+      else editingStatuses.splice(idx, 1);
+      updateStatusButtons();
+    });
+  });
+
+  document.querySelectorAll('.section-group button').forEach(function(b){
+    b.addEventListener('click', function(){
+      editingSection = b.dataset.section;
+      updateSectionButtons();
+    });
+  });
+
+  document.querySelectorAll('.add-point-inline').forEach(function(b){
+    b.addEventListener('click', function(){
+      openNewPoint(b.dataset.section);
+    });
+  });
+
+  document.getElementById('edit-title-btn').addEventListener('click', function(){
+    document.getElementById('title-input').value = state.title || DEFAULT_TITLE;
+    document.getElementById('modal-title').classList.remove('hidden');
+  });
+
+  document.getElementById('title-cancel').addEventListener('click', function(){
+    document.getElementById('modal-title').classList.add('hidden');
+  });
+
+  document.getElementById('title-save').addEventListener('click', function(){
+    var newTitle = document.getElementById('title-input').value.trim();
+    if (!newTitle) { alert('Название не может быть пустым'); return; }
+    state.title = newTitle;
+    saveState();
+    renderTitle();
+    document.getElementById('modal-title').classList.add('hidden');
+  });
+
+  document.getElementById('edit-day-color').addEventListener('click', function(){
+    var day = state.days.find(function(d){ return d.id === currentDayId; });
+    if (!day) return;
+    var current = day.color || DEFAULT_COLOR;
+    buildColorPicker('color-picker', current, function(hex){
+      day.color = hex;
+      saveState();
+      document.getElementById('day-title').style.color = hex;
+      renderDays();
+      document.getElementById('modal-color').classList.add('hidden');
+    });
+    document.getElementById('modal-color').classList.remove('hidden');
+  });
+
+  document.getElementById('color-cancel').addEventListener('click', function(){
+    document.getElementById('modal-color').classList.add('hidden');
+  });
+
+  document.getElementById('day-important').addEventListener('input', function(e){
+    var day = state.days.find(function(d){ return d.id === currentDayId; });
+    if (!day) return;
+    day.important = e.target.value;
+    saveState();
+    renderDays();
+    autoGrow(e.target);
+  });
+
+  document.getElementById('point-cancel').addEventListener('click', function(){
+    document.getElementById('modal-point').classList.add('hidden');
+  });
+
+  document.getElementById('point-save').addEventListener('click', function(){
+    var day = state.days.find(function(d){ return d.id === currentDayId; });
+    if (!day) return;
+    var rawNote = document.getElementById('point-note').value.trim();
+    var finalNote = rawNote;
+    if (rawNote && rawNote !== originalNote) {
+      if (rawNote.indexOf(originalNote) === 0 && originalNote) {
+        var added = rawNote.slice(originalNote.length).trim();
+        if (added) {
+          finalNote = '[' + nowStamp() + '] ' + added + (originalNote ? '\n' + originalNote : '');
+        }
+      } else {
+        finalNote = '[' + nowStamp() + '] ' + rawNote;
+      }
+    }
+
+    var data = {
+      title: document.getElementById('point-title').value.trim(),
+      sub: document.getElementById('point-sub').value.trim(),
+      phone: document.getElementById('point-phone').value.trim(),
+      date: document.getElementById('point-date').value || '',
+      note: finalNote,
+      reminder: document.getElementById('point-reminder').value.trim(),
+      reminderDatetime: document.getElementById('point-reminder-datetime').value || '',
+      pinned: document.getElementById('point-pinned').checked,
+      statuses: editingStatuses.slice()
+    };
+    if (!data.title) { alert('Введи название точки'); return; }
+
+    if (editingPointId) {
+      state.razvitie = state.razvitie.filter(function(x){ return x.id !== editingPointId; });
+      day.sections.akb = day.sections.akb.filter(function(x){ return x.id !== editingPointId; });
+      data.id = editingPointId;
+      var oldP = null;
+      [].concat(state.razvitie, day.sections.akb).forEach(function(x){ if (x.id === data.id) oldP = x; });
+      if (oldP && typeof oldP.order === 'number') data.order = oldP.order;
+      else data.order = 0;
+      if (editingSection === 'razvitie') {
+        state.razvitie.push(data);
+      } else {
+        day.sections.akb.push(data);
+      }
+    } else {
+      data.id = uid();
+      data.order = 0;
+      if (editingSection === 'razvitie') {
+        state.razvitie.push(data);
+      } else {
+        day.sections.akb.push(data);
+      }
+    }
+    saveState();
+    document.getElementById('modal-point').classList.add('hidden');
+    renderSection(day, 'akb', 'points-akb');
+    if (!isNoRazvitie(day)) renderSection(day, 'razvitie', 'points-razvitie');
+    renderDays();
+  });
+
+  document.getElementById('point-delete').addEventListener('click', function(){
+    if (!editingPointId) { document.getElementById('modal-point').classList.add('hidden'); return; }
+    if (!confirm('Удалить точку?')) return;
+    var day = state.days.find(function(d){ return d.id === currentDayId; });
+    if (day) {
+      day.sections.akb = day.sections.akb.filter(function(p){ return p.id !== editingPointId; });
+      state.razvitie = state.razvitie.filter(function(p){ return p.id !== editingPointId; });
+      saveState();
+    }
+    document.getElementById('modal-point').classList.add('hidden');
+    renderSection(day, 'akb', 'points-akb');
+    if (!isNoRazvitie(day)) renderSection(day, 'razvitie', 'points-razvitie');
+    renderDays();
+  });
+
+  document.getElementById('back-to-list').addEventListener('click', function(){
+    currentDayId = null;
+    show('list');
+    renderDays();
+  });
+
+  document.getElementById('export-btn').addEventListener('click', function(){
+    var dataStr = JSON.stringify(state, null, 2);
+    var blob = new Blob([dataStr], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var d = new Date();
+    var name = 'journal-backup-' + d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0') + '.json';
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  });
+
+  document.getElementById('import-btn').addEventListener('click', function(){
+    document.getElementById('import-file').click();
+  });
+
+  document.getElementById('import-file').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var imported = JSON.parse(ev.target.result);
+        if (!imported || !Array.isArray(imported.days)) {
+          alert('Это не файл резервной копии журнала');
+          return;
+        }
+        if (state.days.length > 0) {
+          if (!confirm('В текущем журнале уже есть данные. Заменить их данными из файла?')) return;
+        }
+        if (!imported.razvitie) imported.razvitie = [];
+        imported.days.forEach(function(d){
+          if (!d.color) d.color = DEFAULT_COLOR;
+          if (!d.sections) d.sections = { akb: [], razvitie: [] };
+          if (!d.sections.akb) d.sections.akb = [];
+          if (!d.important) d.important = '';
+          var oldRaz = d.sections.razvitie || [];
+          var knownIds = {};
+          imported.razvitie.forEach(function(p){ knownIds[p.id] = true; });
+          oldRaz.forEach(function(p){
+            migratePoint(p);
+            if (!knownIds[p.id]) {
+              imported.razvitie.push(p);
+              knownIds[p.id] = true;
+            }
+          });
+          d.sections.akb.forEach(migratePoint);
+          d.sections = { akb: d.sections.akb };
+        });
+        imported.razvitie.forEach(migratePoint);
+        state = {
+          days: imported.days,
+          title: imported.title || DEFAULT_TITLE,
+          razvitie: imported.razvitie
+        };
+        saveState();
+        renderTitle();
+        renderDays();
+        currentDayId = null;
+        show('list');
+        alert('Данные импортированы: ' + state.days.length + ' дней');
+      } catch (err) {
+        alert('Не удалось прочитать файл. Убедитесь, что это JSON-файл резервной копии.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  (function() {
+    var startX = 0;
+    var startY = 0;
+    var tracking = false;
+    var EDGE = 40;
+    var MIN_DIST = 80;
+
+    function isEditable(el) {
+      if (!el) return false;
+      var tag = el.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+    }
+
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) { tracking = false; return; }
+      var t = e.touches[0];
+      if (t.clientX > EDGE) { tracking = false; return; }
+      if (isEditable(e.target)) { tracking = false; return; }
+      startX = t.clientX;
+      startY = t.clientY;
+      tracking = true;
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+      if (!tracking) return;
+      tracking = false;
+      if (!e.changedTouches || e.changedTouches.length !== 1) return;
+      var t = e.changedTouches[0];
+      var dx = t.clientX - startX;
+      var dy = Math.abs(t.clientY - startY);
+      if (dx < MIN_DIST) return;
+      if (dy > dx) return;
+
+      var anyOpenModal = document.querySelector('.modal:not(.hidden)');
+      if (anyOpenModal) {
+        anyOpenModal.classList.add('hidden');
+        return;
+      }
+      if (currentDayId) {
+        currentDayId = null;
+        show('list');
+        renderDays();
+      }
+    }, { passive: true });
+  })();
+
+  renderTitle();
+  renderDays();
+})();
+</script>
+</body>
+</html>

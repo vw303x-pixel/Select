@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e8edf5"/>
+    </linearGradient>
+    <linearGradient id="canGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5a8dff"/>
+      <stop offset="100%" stop-color="#2a5bd7"/>
+    </linearGradient>
+    <linearGradient id="canGloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <linearGradient id="dropGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd27a"/>
+      <stop offset="100%" stop-color="#ffb84d"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffb84d"/>
+      <stop offset="100%" stop-color="#e6952a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Светлый фон -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+
+  <!-- Тень под канистрой -->
+  <ellipse cx="256" cy="430" rx="150" ry="20" fill="rgba(42,91,215,0.15)"/>
+
+  <!-- Канистра: корпус -->
+  <rect x="126" y="150" width="260" height="270" rx="32" fill="url(#canGrad)"/>
+
+  <!-- Глянцевый блик на корпусе -->
+  <rect x="126" y="150" width="260" height="140" rx="32" fill="url(#canGloss)"/>
+
+  <!-- Ручка канистры (вырез) -->
+  <rect x="196" y="176" width="120" height="56" rx="20" fill="#e8edf5"/>
+  <rect x="210" y="190" width="92" height="28" rx="12" fill="#ffffff"/>
+
+  <!-- Крышка / горловина -->
+  <rect x="300" y="112" width="56" height="60" rx="12" fill="url(#capGrad)"/>
+  <rect x="300" y="112" width="56" height="30" rx="12" fill="rgba(255,255,255,0.35)"/>
+
+  <!-- Полоса-этикетка -->
+  <rect x="126" y="290" width="260" height="70" fill="#ffffff" opacity="0.55"/>
+  <rect x="126" y="290" width="260" height="70" fill="url(#canGloss)" opacity="0.4"/>
+
+  <!-- Капля масла на этикетке -->
+  <path d="M 256 300
+           C 256 300, 226 330, 226 348
+           C 226 365, 239 378, 256 378
+           C 273 378, 286 365, 286 348
+           C 286 330, 256 300, 256 300 Z"
+        fill="url(#dropGrad)"/>
+  <ellipse cx="246" cy="340" rx="8" ry="12" fill="rgba(255,255,255,0.6)"/>
+
+  <!-- Обводка канистры -->
+  <rect x="126" y="150" width="260" height="270" rx="32" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="3"/>
+</svg>
